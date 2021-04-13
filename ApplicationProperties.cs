@@ -244,7 +244,8 @@ namespace d3mm
                 string sExecutable = string.Empty;
                 try
                 {
-                    using (RegistryKey key = Registry.LocalMachine.OpenSubKey(c_sInstallationLocationRegistryKey))
+                    RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+                    using (RegistryKey key = baseKey.OpenSubKey(c_sInstallationLocationRegistryKey))
                     {
                         if (key != null)
                         {

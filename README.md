@@ -21,6 +21,10 @@ The code is hopefully quite readable and open for modifications. A short breakdo
 - Programm.cs: Initializing application properties (settings) and opening the main-window.
 
 ## Changelog
+### [1.0.1] - 2021-04-13
+#### Fixed
+- Fix crashes when modifying column-width of preview-column (now recreates main-window)
+- Fix not getting correct key from registry (now explicitly using Registry64)
 ### [1.0.0] - 2021-04-13
 #### Added
 - List View containing all mods from mod.io for Desperados III

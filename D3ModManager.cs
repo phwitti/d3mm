@@ -1,12 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace d3mm
@@ -53,6 +46,14 @@ namespace d3mm
         private Panel m_panel;
         private D3ModDatabase m_modDatabase;
         private bool m_bInitialized;
+        private bool m_bReopen;
+
+        //
+
+        public bool Reopen
+        {
+            get { return m_bReopen; }
+        }
 
         //
 
@@ -60,7 +61,7 @@ namespace d3mm
         {
             this.InitializeComponent();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.WindowState = ApplicationProperties.Config.Maximized 
+            this.WindowState = ApplicationProperties.Config.Maximized
                 ? System.Windows.Forms.FormWindowState.Maximized
                 : System.Windows.Forms.FormWindowState.Normal;
             this.ClientSize = new System.Drawing.Size(
@@ -108,7 +109,7 @@ namespace d3mm
             m_listView.AllColumns.Add(m_versionColumn);
             m_listView.OwnerDraw = true;
             m_listView.RebuildColumns();
-            
+
             m_installedColumn.AspectName = nameof(D3ModInfo.VersionInstalled);
             m_installedColumn.Text = c_sColumnTitleInstalled;
             m_installedColumn.Width = ApplicationProperties.Config.InstalledColumnWidth;
@@ -144,7 +145,7 @@ namespace d3mm
             m_submittedByColumn.IsVisible = ApplicationProperties.Config.SubmittedByColumnVisible;
             m_submittedByColumn.VisibilityChanged += this.OnColumnVisibilityChanged;
             m_tagsColumn.AspectName = nameof(D3ModInfo.Tags);
-            m_tagsColumn.AspectToStringConverter = delegate(object x) { return string.Join(", ", (string[])x); };
+            m_tagsColumn.AspectToStringConverter = delegate (object x) { return string.Join(", ", (string[])x); };
             m_tagsColumn.Text = c_sColumnTitleTags;
             m_tagsColumn.Width = ApplicationProperties.Config.TagsColumnWidth;
             m_tagsColumn.IsVisible = ApplicationProperties.Config.TagsColumnVisible;
@@ -158,7 +159,7 @@ namespace d3mm
             if (m_previewColumn.IsVisible)
             {
                 m_listView.RowHeight = Math.Max(
-                    c_iMinRowHeight, 
+                    c_iMinRowHeight,
                     Math.Min(
                         (int)((ApplicationProperties.Config.PreviewColumnWidth / c_fPreviewAspectWidth) * c_fPreviewAspectHeight),
                         c_iMaxRowHeight));
@@ -177,7 +178,7 @@ namespace d3mm
                 ? null
                 : m_listView.GetColumn(ApplicationProperties.Config.SecondarySortColumn);
             m_listView.SetObjects(m_modDatabase.Mods);
-            
+
             m_listView.RebuildColumns();
 
             m_webBroser = new WebBrowser();
@@ -196,7 +197,7 @@ namespace d3mm
 
             m_buttonStart = new Button();
             m_buttonStart.Text = c_sTextStart;
-            m_buttonStart.Dock =  DockStyle.Right;
+            m_buttonStart.Dock = DockStyle.Right;
             m_buttonStart.Height = c_iButtonPanelHeight;
             m_buttonStart.Click += OnStartButtonClicked;
             m_buttonStart.Enabled = !string.IsNullOrEmpty(ApplicationProperties.Config.Executable);
@@ -205,7 +206,7 @@ namespace d3mm
             m_buttonWeb.Text = ApplicationProperties.Config.WebBrowserCollapsed
                 ? c_sTextWebpageShow
                 : c_sTextWebpageHide;
-            m_buttonWeb.Dock =  DockStyle.Right;
+            m_buttonWeb.Dock = DockStyle.Right;
             m_buttonWeb.Height = c_iButtonPanelHeight;
             m_buttonWeb.Click += OnWebButtonClicked;
 
@@ -215,7 +216,7 @@ namespace d3mm
             m_splitContainer.Panel1.Controls.Add(m_listView);
             m_splitContainer.Panel1.Controls.Add(m_panel);
             m_splitContainer.Panel2.Controls.Add(m_webBroser);
-            m_splitContainer.SplitterDistance = 
+            m_splitContainer.SplitterDistance =
                 Screen.GetWorkingArea(this).Width - ApplicationProperties.Config.SplitterDistanceRight;
             m_splitContainer.SplitterMoved += this.OnSplitterMoved;
             m_splitContainer.Panel2Collapsed = ApplicationProperties.Config.WebBrowserCollapsed;
@@ -244,7 +245,8 @@ namespace d3mm
             if (!m_bInitialized)
                 return;
 
-            if (this.WindowState == FormWindowState.Normal) {
+            if (this.WindowState == FormWindowState.Normal)
+            {
                 ApplicationProperties.Config.Maximized = false;
                 ApplicationProperties.Config.Width = this.Width;
                 ApplicationProperties.Config.Height = this.Height;
@@ -256,7 +258,7 @@ namespace d3mm
 
             base.OnClientSizeChanged(e);
         }
-        
+
         private void OnColumnWidthChanged(Object sender, ColumnWidthChangedEventArgs e)
         {
             if (!m_bInitialized)
@@ -281,15 +283,8 @@ namespace d3mm
             if (column == m_previewColumn
                 && m_previewColumn.IsVisible)
             {
-                m_bInitialized = false;
-                column.IsVisible = false; // can't change row-height, while image-column is visible
-                m_listView.RowHeight = Math.Max(c_iMinRowHeight, Math.Min((int)((iWidth / c_fPreviewAspectWidth) * c_fPreviewAspectHeight), c_iMaxRowHeight));
-                column.IsVisible = true;
-                m_bInitialized = true;
-
-                // fix for missing check-boxes
-                m_listView.CheckBoxes = false;
-                m_listView.CheckBoxes = true;
+                m_bReopen = true;
+                this.Close();
             }
         }
 
@@ -315,35 +310,15 @@ namespace d3mm
 
             if (column.DisplayIndex == 1)
             {
-                if (bVisible)
-                {
-                    m_bInitialized = false;
-                    column.IsVisible = false; // can't change row-height, while image-column is visible -.-
-                    m_listView.RowHeight = Math.Max(
-                        c_iMinRowHeight,
-                        Math.Min(
-                            (int)((ApplicationProperties.Config.PreviewColumnWidth / 320.0f) * 180.0f),
-                            c_iMaxRowHeight));
-                    column.IsVisible = true;
-                    m_bInitialized = true;
-                }
-                else
-                {
-                    m_bInitialized = false;
-                    m_listView.RowHeight = c_iMinRowHeight;
-                    m_bInitialized = true;
-                }
-
-                // fix for missing check-boxes
-                m_listView.CheckBoxes = false;
-                m_listView.CheckBoxes = true;
+                m_bReopen = true;
+                this.Close();
             }
         }
 
         private void OnSelectionChanged(object sender, EventArgs e)
         {
             D3ModInfo d3ModInfo = m_listView.SelectedObject as D3ModInfo;
-            
+
             if (!m_splitContainer.Panel2Collapsed)
             {
                 m_webBroser.Url = new System.Uri(d3ModInfo?.URL ?? c_sWebPageBlank);
@@ -393,13 +368,14 @@ namespace d3mm
 
         private void OnStartButtonClicked(object sender, System.EventArgs e)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo(){
+            ProcessStartInfo startInfo = new ProcessStartInfo()
+            {
                 FileName = ApplicationProperties.Config.Executable,
                 WorkingDirectory = System.IO.Path.GetDirectoryName(ApplicationProperties.Config.Executable),
             };
 
             Process.Start(startInfo);
-            
+
         }
 
         private void OnWebButtonClicked(object sender, System.EventArgs e)
@@ -425,8 +401,8 @@ namespace d3mm
             if (!m_bInitialized)
                 return;
 
-             ApplicationProperties.Config.SplitterDistanceRight = 
-                Screen.GetWorkingArea(this).Width - m_splitContainer.SplitterDistance;
+            ApplicationProperties.Config.SplitterDistanceRight =
+               Screen.GetWorkingArea(this).Width - m_splitContainer.SplitterDistance;
         }
     }
 }

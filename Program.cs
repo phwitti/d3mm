@@ -20,8 +20,27 @@ namespace d3mm
 #endif
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new D3ModManager());
+            while (ShowWindow())
+            {
+                ApplicationProperties.Exit();
+                ApplicationProperties.Init();
+            }
+
             ApplicationProperties.Exit();
+        }
+
+        static bool ShowWindow()
+        {
+            try
+            {
+                D3ModManager d3mm = new D3ModManager();
+                Application.Run(d3mm);
+                return d3mm.Reopen;
+            }
+            catch
+            {
+                return true;
+            }
         }
     }
 }
