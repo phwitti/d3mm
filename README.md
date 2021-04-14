@@ -6,7 +6,7 @@ mod.io Mod-Manager for Desperados III (Level Files). Every time something is cal
 List / Sort / Install / Uninstall Mods from mod.io.
 
 ## Installation
-Builds for windows can be downloaded on the releases page (built with Visual Studio 2017) -- winforms is also quite well supported in mono on linux. You can also build from source with d3mm.vs2017.csproj (VS2017) or d3mm.csproj using .net5 (though Object-List-View is not supported on .net5 so you might have various bugs and problems using that).
+Builds for windows can be downloaded on the releases page (built with Visual Studio 2017) -- winforms is also quite well supported in mono on linux. You can also build from source with d3mm.vs2017.csproj (VS2017) or d3mm.csproj using .net5 (though Object-List-View is not supported on .net5 so you might have various bugs and problems using that). For steam all should be auto-configures on first start -- for other platforms or if any problems occur see -> Configuarion.
 
 ## Configuration
 Next to the executable lies a d3mm.config.json file where the 'Desperados III' save-folder is set, the .d3mm-Folder containing the mod-managers data is placed underneath that. In the .d3mm-Folder there is the main-configuration-file (config.json), containing all other (more dynamic) properties; Most relevant are likely UserDirectory and Executable -- both are attempted to be auto-configured for steam on windows, though might be wrong or not set at all for Epic-Games-Store or gog or other operating systems.
